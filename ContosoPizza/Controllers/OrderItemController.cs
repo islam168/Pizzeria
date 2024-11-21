@@ -1,4 +1,5 @@
-﻿using ContosoPizza.Interface;
+﻿using Azure.Core;
+using ContosoPizza.Interface;
 using ContosoPizza.Services;
 using ContosoPizza.ViewModel;
 using Microsoft.AspNetCore.Mvc;
@@ -23,12 +24,12 @@ namespace ContosoPizza.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrderItem([FromBody] OrderItemViewModel orderItem)
+        public async Task<IActionResult> CreateOrderItem([FromBody] CreateOrderItemViewModel orderItem)
         {
             if (!ModelState.IsValid) 
                 return BadRequest(ModelState);
 
-            var response = await _orderItemService.CreateOrderItem(orderItem);
+            var response = await _orderItemService.CreateOrderItem(orderItem, Request);
 
             if (!response.Success)
             {

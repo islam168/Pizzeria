@@ -15,6 +15,7 @@ namespace ContosoPizza.Controllers
             _customerService = customerService;
         }
 
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterCustomerViewModel customer)
         {
@@ -29,6 +30,21 @@ namespace ContosoPizza.Controllers
             }
 
             return Ok(response);  // Возвращаем успешное сообщение.
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginCustomerViewModel customer)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _customerService.LoginCustomer(customer);
+            if (!response.Success)
+                return BadRequest(response.Message);
+
+            HttpContext.Response.Cookies.Append("secretCookies", response.Data?.ToString());
+
+            return Ok(response);
         }
     }
 }

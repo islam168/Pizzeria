@@ -1,5 +1,4 @@
-﻿using ContosoPizza.Services;
-using ContosoPizza.ViewModel;
+﻿using ContosoPizza.ViewModel;
 
 namespace ContosoPizza.Interface
 {
@@ -7,7 +6,7 @@ namespace ContosoPizza.Interface
     {
         Task<List<OrderItemViewModel>> GetAllCustomerOrderItems(int customerId);
         Task<OrderItemViewModel?> GetOrderItem(int orderItemId);
-        Task<ServiceResponse> CreateOrderItem(OrderItemViewModel orderItem);
+        Task<ServiceResponse> CreateOrderItem(CreateOrderItemViewModel orderItem, HttpRequest request);
         Task<ServiceResponse> UpdateOrderItem(OrderItemViewModel orderItem);
     }
 }

@@ -3,6 +3,7 @@ using ContosoPizza.Interface;
 using ContosoPizza.Models;
 using ContosoPizza.ViewModel;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ContosoPizza.Services
 {
@@ -42,10 +43,19 @@ namespace ContosoPizza.Services
             return orderItem != null? MapToViewModel(orderItem) : null;
         }
 
-        public async Task<ServiceResponse> CreateOrderItem(OrderItemViewModel orderItem)
+        public async Task<ServiceResponse> CreateOrderItem(CreateOrderItemViewModel orderItem, HttpRequest request)
         {
+
+            var jwtToken = request.Cookies["secretCookies"];
+
+            // Расшифровываем токен и извлекаем customerId
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+            var cartId = Convert.ToInt32(token.Claims.FirstOrDefault(c => c.Type == "cartId")!.Value);
+            
+
             var existingOrderItem = await _context.OrderItems
-                .FirstOrDefaultAsync(o => o.CartId == orderItem.CartId && o.PizzaId == orderItem.PizzaId);
+                .FirstOrDefaultAsync(o => o.CartId == cartId && o.PizzaId == orderItem.PizzaId);
 
             if (existingOrderItem != null)
                 return ServiceResponse.FailureResponse("Pizza is already in the cart.");
@@ -58,7 +68,7 @@ namespace ContosoPizza.Services
                 .Where(p => p.Id == orderItem.PizzaId)
                 .Select(p => p.Price)
                 .FirstOrDefault() * orderItem.Quantity,
-                CartId = orderItem.CartId,
+                CartId = cartId,
                 PizzaId = orderItem.PizzaId
             };
 

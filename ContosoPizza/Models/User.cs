@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ContosoPizza.Models
+﻿namespace ContosoPizza.Models
 {
     public class User
     {
@@ -9,5 +7,8 @@ namespace ContosoPizza.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Password { get; set; } // Добавить Хэширование.
+
+        public int RoleId { get; set; } // Внешний ключ.
+        public Role Role { get; set; }
     }
 }

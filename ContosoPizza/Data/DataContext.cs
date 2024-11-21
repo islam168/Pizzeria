@@ -11,7 +11,7 @@ namespace ContosoPizza.Data
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Admin> Admins { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Pizza> Pizzas { get; set; }
         public DbSet<CreditCard> CreditCards { get; set; }
@@ -88,6 +88,13 @@ namespace ContosoPizza.Data
                 .HasMany(i => i.Pizzas)
                 .WithMany(p => p.Ingredients)
                 .UsingEntity(j => j.ToTable("PizzaIngredient")); // Промежуточная таблица.
+
+            // Связь многое ко многим между User и Role
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Role)
+                .WithMany(r => r.Users)
+                .HasForeignKey(u => u.RoleId);
+
         }
     }
 

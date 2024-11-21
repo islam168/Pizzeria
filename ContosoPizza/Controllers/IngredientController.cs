@@ -1,5 +1,6 @@
 ﻿using ContosoPizza.Interfaces;
 using ContosoPizza.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContosoPizza.Controllers
@@ -29,6 +30,7 @@ namespace ContosoPizza.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateIngredient([FromBody] IngredientViewModel ingredient)
         {
             if (!ModelState.IsValid) 

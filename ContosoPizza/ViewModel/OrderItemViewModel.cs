@@ -1,7 +1,4 @@
-﻿using ContosoPizza.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace ContosoPizza.ViewModel
+﻿namespace ContosoPizza.ViewModel
 {
     public class OrderItemViewModel
     {
