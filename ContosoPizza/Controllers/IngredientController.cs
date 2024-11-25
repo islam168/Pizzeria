@@ -30,7 +30,7 @@ namespace ContosoPizza.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateIngredient([FromBody] IngredientViewModel ingredient)
         {
             if (!ModelState.IsValid) 
@@ -52,18 +52,24 @@ namespace ContosoPizza.Controllers
 
             var response = await _ingredientService.UpdateIngredient(ingredient);
 
-            if(!response.Success)
+            if (!response.Success && response.ErrorCode == 404)
+                return NotFound();
+
+            else if (!response.Success)
                 return BadRequest(response.Message);
 
             return Ok(response);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteIngredient(int id)
         {
             var response = await _ingredientService.DeleteIngredient(id);
 
-            if (!response.Success)
+            if (!response.Success && response.ErrorCode == 404)
+                return NotFound();
+
+            else if (!response.Success)
                 return BadRequest(response.Message);
 
             return Ok(response);

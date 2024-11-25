@@ -43,15 +43,11 @@ namespace ContosoPizza.Services
             return orderItem != null? MapToViewModel(orderItem) : null;
         }
 
-        public async Task<ServiceResponse> CreateOrderItem(CreateOrderItemViewModel orderItem, HttpRequest request)
+        public async Task<ServiceResponse> CreateOrderItem(CreateOrderItemViewModel orderItem, int customerId)
         {
 
-            var jwtToken = request.Cookies["secretCookies"];
-
-            // Расшифровываем токен и извлекаем customerId
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(jwtToken);
-            var cartId = Convert.ToInt32(token.Claims.FirstOrDefault(c => c.Type == "cartId")!.Value);
+            var cart = await _context.Carts.FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            int cartId = cart.Id;
             
 
             var existingOrderItem = await _context.OrderItems
@@ -84,7 +80,7 @@ namespace ContosoPizza.Services
                 .FirstOrDefaultAsync(c => c.Id == orderItem.Id);
 
             if (existingOrderItem == null)
-                return ServiceResponse.FailureResponse("Order item not found.");
+                return ServiceResponse.FailureResponse("Order item not found.", 404);
 
             existingOrderItem.Quantity = orderItem.Quantity;
 
@@ -96,6 +92,19 @@ namespace ContosoPizza.Services
             await _context.SaveChangesAsync();
 
             return ServiceResponse.SuccessResponse("Order Item updated successfully.", MapToViewModel(existingOrderItem));
+        }
+
+        public async Task<ServiceResponse> DeleteOrderItem(int orderItemId)
+        {
+            var orderItem = await _context.OrderItems.FindAsync(orderItemId);
+
+            if (orderItem == null)
+                return ServiceResponse.FailureResponse("Order Item not found.", 404);
+
+            _context.OrderItems.Remove(orderItem);
+            await _context.SaveChangesAsync();
+
+            return ServiceResponse.SuccessResponse("Order Item remove successfully.");
         }
     }
 }

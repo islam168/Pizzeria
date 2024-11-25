@@ -1,5 +1,4 @@
 ﻿using ContosoPizza.Interface;
-using ContosoPizza.Services;
 using ContosoPizza.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,10 +25,10 @@ namespace ContosoPizza.Controllers
             var response = await _customerService.RegisterCustomer(customer);
             if (!response.Success)
             {
-                return BadRequest(response.Message);  // Возвращаем ошибку с сообщением.
+                return BadRequest(response.Message);
             }
 
-            return Ok(response);  // Возвращаем успешное сообщение.
+            return Ok(response);
         }
 
         [HttpPost("login")]
@@ -39,10 +38,13 @@ namespace ContosoPizza.Controllers
                 return BadRequest(ModelState);
 
             var response = await _customerService.LoginCustomer(customer);
-            if (!response.Success)
+            if (!response.Success && response.ErrorCode == 404)
+                return NotFound();
+
+            else if (!response.Success)
                 return BadRequest(response.Message);
 
-            HttpContext.Response.Cookies.Append("secretCookies", response.Data?.ToString());
+            HttpContext.Response.Cookies.Append("secretCookies", response.Message);
 
             return Ok(response);
         }

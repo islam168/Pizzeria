@@ -46,7 +46,7 @@ namespace ContosoPizza.Services
                 Name = ingredient.Name
             };
 
-            await _context.Ingredients.AddAsync(newIngredient);
+            _context.Ingredients.Add(newIngredient);
             await _context.SaveChangesAsync();
 
             return ServiceResponse.SuccessResponse("Ingredient created successfully.", MapToViewModel(newIngredient));
@@ -56,7 +56,7 @@ namespace ContosoPizza.Services
         {
             var ingredient = await _context.Ingredients.FindAsync(id);
             if (ingredient == null)
-                return ServiceResponse.FailureResponse("Ingredient not found");
+                return ServiceResponse.FailureResponse("Ingredient not found", 404);
 
             _context.Ingredients.Remove(ingredient);
             await _context.SaveChangesAsync();
@@ -68,7 +68,7 @@ namespace ContosoPizza.Services
         {
             var existingIngredient = await _context.Ingredients.FindAsync(ingredient.Id);
             if (existingIngredient == null)
-                return ServiceResponse.FailureResponse("Ingredient not found.");
+                return ServiceResponse.FailureResponse("Ingredient not found.", 404);
 
             _context.Entry(existingIngredient).CurrentValues.SetValues(ingredient);
             await _context.SaveChangesAsync();

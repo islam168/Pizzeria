@@ -1,8 +1,10 @@
 ﻿public class ServiceResponse
 {
     public bool Success { get; set; }
-    public string Message { get; set; }
+    public string? Message { get; set; }
     public object? Data { get; set; }
+    public int? ErrorCode { get; set; }
+
 
     // Статические методы для создания успешного и неудачного ответа
     public static ServiceResponse SuccessResponse(string message, object? data = null)
@@ -15,13 +17,13 @@
         };
     }
 
-    public static ServiceResponse FailureResponse(string message)
+    public static ServiceResponse FailureResponse(string? message = "", int? errorCode = null)
     {
         return new ServiceResponse
         {
             Success = false,
             Message = message,
-            Data = null
+            ErrorCode = errorCode
         };
     }
 }

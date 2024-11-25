@@ -20,6 +20,7 @@ builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IOrderItemService, OrderItemService>();
 builder.Services.AddScoped<IIngredientService, IngredientService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddScoped<IJWTProvider, JWTProvider>();
 

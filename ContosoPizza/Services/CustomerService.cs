@@ -4,7 +4,6 @@ using ContosoPizza.Models;
 using Microsoft.EntityFrameworkCore;
 using ContosoPizza.Interface;
 using ContosoPizza.Utilities.JWT;
-using Microsoft.AspNetCore.Identity;
 
 
 namespace ContosoPizza.Services
@@ -21,30 +20,30 @@ namespace ContosoPizza.Services
 
         public async Task<ServiceResponse> RegisterCustomer(RegisterCustomerViewModel customer)
         {
-            var existingCustomer = await GetCustomerByEmailAsync(customer.Email);
-
             // Проверка, существует ли пользователь с данной электронной почтой.
+            var existingCustomer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == customer.Email.ToLower());
+
             if (existingCustomer != null)
                 return ServiceResponse.FailureResponse("A customer with this email already exists.");
-
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(customer.Password);
 
             // Получение роли "customer".
-            var customerRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Customer");
+            string role = "Customer";
+            var customerRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role);
 
             var newCustomer = new Customer
             {
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
-                Email = customer.Email,
+                Email = customer.Email.ToLower(),
                 Address = customer.Address,
                 Phone = customer.Phone,
                 Password = passwordHash,
-                RoleId = customerRole.Id
+                RoleId = customerRole.Id,
             };
 
-            await _context.Customers.AddAsync(newCustomer);
+            _context.Customers.Add(newCustomer);
             await _context.SaveChangesAsync();
 
             // Создаем корзину для нового пользователя
@@ -56,7 +55,7 @@ namespace ContosoPizza.Services
             };
 
             // Добавляем корзину в базу данных
-            await _context.Carts.AddAsync(newCart);
+            _context.Carts.Add(newCart);
             await _context.SaveChangesAsync();
 
             // Обновляем пользователя с привязкой к корзине
@@ -68,10 +67,11 @@ namespace ContosoPizza.Services
 
         public async Task<ServiceResponse> LoginCustomer(LoginCustomerViewModel customer)
         {
-            var existingCustomer = await GetCustomerByEmailAsync(customer.Email);
+            var existingCustomer = await _context.Customers.Include(c => c.Role)
+                .FirstOrDefaultAsync(c => c.Email == customer.Email);
 
             if (existingCustomer == null)
-                return ServiceResponse.FailureResponse("Customer not found.");
+                return ServiceResponse.FailureResponse("", 404);
 
             // Проверяем, совпадает ли введенный пароль с паролем в БД. 
             bool passwordMatches = BCrypt.Net.BCrypt.Verify(customer.Password, existingCustomer.Password);
@@ -81,14 +81,7 @@ namespace ContosoPizza.Services
 
             var token = _jwtProvider.GenerateToken(existingCustomer);
 
-            return ServiceResponse.SuccessResponse("Logined successfully", token);
+            return ServiceResponse.SuccessResponse(token);
         }
-
-        // Проверка существует ли пользователь в БД.
-        private async Task<Customer?> GetCustomerByEmailAsync(string email)
-        {
-            return await _context.Customers.Include(c => c.Role).FirstOrDefaultAsync(c => c.Email == email);
-        }
-
     }
 }

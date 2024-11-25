@@ -19,7 +19,7 @@ namespace ContosoPizza.Utilities.JWT
             // Создаем массив Claims
             Claim[] claims = new Claim[]
             {
-                new Claim("cartId", customer.CartId.ToString()!),
+                new Claim("customerId", customer.Id.ToString()!),
                 new Claim("role", customer.Role.Name) // Если Role или Name == null, будет использоваться "defaultRole"
             };
 

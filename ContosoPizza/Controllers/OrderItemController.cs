@@ -1,6 +1,4 @@
-﻿using Azure.Core;
-using ContosoPizza.Interface;
-using ContosoPizza.Services;
+﻿using ContosoPizza.Interface;
 using ContosoPizza.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,19 +22,19 @@ namespace ContosoPizza.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrderItem([FromBody] CreateOrderItemViewModel orderItem)
+        public async Task<IActionResult> CreateOrderItem([FromBody] CreateOrderItemViewModel orderItem, int customerId)
         {
             if (!ModelState.IsValid) 
                 return BadRequest(ModelState);
 
-            var response = await _orderItemService.CreateOrderItem(orderItem, Request);
+            var response = await _orderItemService.CreateOrderItem(orderItem, customerId);
 
             if (!response.Success)
             {
-                return BadRequest(response.Message);  // Возвращаем ошибку с сообщением.
+                return BadRequest(response.Message);
             }
 
-            return Ok(response);  // Возвращаем успешное сообщение.
+            return Ok(response);
         }
 
         [HttpPut("{orderItemId}")]
@@ -47,14 +45,27 @@ namespace ContosoPizza.Controllers
 
             var response = await _orderItemService.UpdateOrderItem(orderItem);
 
-            if (!response.Success)
-            {
-                return BadRequest(response.Message);  // Возвращаем ошибку с сообщением
-            }
+            if (!response.Success && response.ErrorCode == 404)
+                return NotFound();
 
-            return Ok(response);  // Возвращаем успешное сообщение
+            else if (!response.Success)
+                return BadRequest(response.Message);
 
+            return Ok(response);
+        }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrderItem(int id)
+        {
+            var response = await _orderItemService.DeleteOrderItem(id);
+
+            if (!response.Success && response.ErrorCode == 404)
+                return NotFound();
+
+            else if (!response.Success)
+                return BadRequest(response.Message);
+
+            return Ok(response);
         }
     }
 }
